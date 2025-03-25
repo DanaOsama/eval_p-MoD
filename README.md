@@ -5,4 +5,5 @@ This work aims to evaluate the performance of the p-MoD method [1] on the PaliGe
 ## References
 
 [1]	J. Zhang, D. Meng, J. Qi, Z. Huang, T. Wu, and L. Wang, ‘p-MoD: Building Mixture-of-Depths MLLMs via Progressive Ratio Decay’, *arXiv [cs.CV]*. 2024.
+
 [2]	L. Beyer *et al.*, ‘PaliGemma: A versatile 3B VLM for transfer’, *arXiv [cs.CV]*. 2024.
