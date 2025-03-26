@@ -1,10 +1,42 @@
 import re
 import inflect
+import word2number
+
 
 # Initialize inflect engine for number word conversion
 p = inflect.engine()
 
-def preprocess_text(text):
+def preprocess_text_word2number(text):
+    """Cleans and normalizes text for fair comparison in VQA evaluation."""
+    
+    # Lowercasing
+    text = text.lower()
+
+    # Remove articles
+    text = re.sub(r'\b(a|an|the)\b', ' ', text)
+
+    # Convert number words to digits (e.g., "twenty five" → "25")
+    try:
+        text = word2number.w2n.word_to_num(text)
+        text = str(text)
+    except ValueError:
+        pass  # Keep original text if it's not a number
+
+    # Handle missing apostrophes in contractions (e.g., "dont" → "don't")
+    contractions = {"dont": "don't", "wont": "won't", "isnt": "isn't", "arent": "aren't"}
+    words = text.split()
+    words = [contractions[word] if word in contractions else word for word in words]
+    text = " ".join(words)
+
+    # Remove punctuation (except apostrophes and colons)
+    text = re.sub(r'[^a-zA-Z0-9:\'\s]', ' ', text)
+
+    # Remove extra spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
+
+def preprocess_text_inflect(text):
     """
     Preprocesses text with the following steps:
     - Converts to lowercase

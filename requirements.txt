@@ -1,3 +1,5 @@
 transformers
 inflect
 tabulate
+datasets
+word2number

@@ -11,9 +11,10 @@ METRICS = {
     "vqa": vqa_accuracy
 }
 
-def evaluate(metrics=["anls", "exact_match", "vqa"]):
-    model = CustomPaliGemma()
-    dataset = load_hf_dataset("your-dataset-name", split="test")
+def evaluate(model, dataset_name, metrics=["anls", "exact_match", "vqa"]):
+    print(f"Evaluating {model.__class__.__name__} on {dataset_name} with metrics: {metrics}")
+
+    dataset = load_hf_dataset(dataset_name, split="test")
 
     predictions, ground_truths, ground_truth_lists = [], [], []
     for batch in dataset:
@@ -33,7 +34,6 @@ def evaluate(metrics=["anls", "exact_match", "vqa"]):
         else:
             results[metric.replace("_", " ").title()] = METRICS[metric](predictions, ground_truths)
 
-    # Print summary table
     table = [[metric, f"{value:.4f}"] for metric, value in results.items()]
     print(tabulate(table, headers=["Metric", "Score"], tablefmt="grid"))
 
