@@ -90,7 +90,44 @@ def compute_anls_for_dataset(
         score = anls_single(references, prediction, threshold)["anls"]  # Compute ANLS per question
         anls_scores.append(score)
 
-    return aggregation_method(anls_scores) if anls_scores else 0.0
+    return {"anls": aggregation_method(anls_scores) if anls_scores else 0.0}
+
+def mean_aggregation(values):
+    """Returns the mean of the list."""
+    return np.mean(values) if values else 0.0
+
+def median_aggregation(values):
+    """Returns the median of the list."""
+    return np.median(values) if values else 0.0
+
+def max_aggregation(values):
+    """Returns the maximum value from the list."""
+    return max(values) if values else 0.0
+
+def min_aggregation(values):
+    """Returns the minimum value from the list."""
+    return min(values) if values else 0.0
+
+def weighted_mean_aggregation(values, weights):
+    """
+    Returns the weighted mean of the list.
+
+    :param values: List of ANLS scores.
+    :param weights: List of corresponding weights (must be same length as values).
+    """
+    if not values or not weights or len(values) != len(weights):
+        return 0.0
+    return np.average(values, weights=weights)
+
+def percentile_aggregation(values, percentile=75):
+    """
+    Returns the specified percentile (e.g., 75th percentile) of the list.
+
+    :param values: List of ANLS scores.
+    :param percentile: The percentile to compute (default: 75).
+    """
+    return np.percentile(values, percentile) if values else 0.0
+
 
 ### the code used in the `exact_match_hf_evaluate` function is ported from
 ### https://github.com/huggingface/evaluate/blob/main/metrics/exact_match/exact_match.py
@@ -165,17 +202,6 @@ def exact_match_hf_evaluate(
         total_score += match
 
     return {"exact_match": total_score / num_samples if num_samples > 0 else 0.0}
-
-
-# def exact_match(references, predictions, preprocess=False):
-#     """
-#     Computes Exact Match (EM) accuracy.
-#     """
-#     if preprocess:
-#         references = [preprocess_text_word2number(ref) for ref in references]
-#         predictions = [preprocess_text_word2number(pred) for pred in predictions]
-
-#     return np.mean([pred == gt for pred, gt in zip(predictions, references)])
 
 
 def vqa_accuracy(predictions, references):
