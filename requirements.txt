@@ -3,3 +3,5 @@ inflect
 tabulate
 datasets
 word2number
+timm
+accelerate
