@@ -3,12 +3,7 @@ from transformers import AdamW
 from data.dataset_loader import load_hf_dataset
 from models.paligemma_custom import CustomPaliGemma
 
-epochs = 1
-lr = 5e-5
-dataset = "howard-hou/OCR-VQA"
-model_name = "paligemma_pmod"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 
 def train(model, dataset_name, epochs=3, lr=5e-5):
