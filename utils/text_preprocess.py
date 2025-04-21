@@ -85,46 +85,6 @@ def preprocess_text_inflect(text):
 
     return text
 
-# def normalize_predictions_references(predictions, references):
-#     """
-#     Ensures predictions are a list of strings and references are a list of lists of strings.
-    
-#     Args:
-#         predictions (list): List of predicted answers (strings or lists).
-#         references (list): List of reference answers (strings or lists of lists).
-    
-#     Returns:
-#         tuple: (processed_predictions, processed_references)
-#     """
-#     normalized_predictions = []
-#     normalized_references = []
-
-#     for i, (pred, ref_list) in enumerate(zip(predictions, references)):
-#         # Ensure prediction is always a string
-#         if not isinstance(pred, str):
-#             if isinstance(pred, list) and pred:  # If it's a non-empty list, take the first item
-#                 pred = pred[0]
-#             else:
-#                 raise ValueError(f"Invalid prediction format at index {i}: {pred}")
-#         normalized_predictions.append(pred)
-
-#         # Ensure reference is a list of lists of strings
-#         if isinstance(ref_list, str):  
-#             ref_list = [[ref_list]]  # Convert single string to a list of lists
-#         elif isinstance(ref_list, list):  
-#             if all(isinstance(ref, str) for ref in ref_list):  # Case where ref_list = ["answer1", "answer2"]
-#                 ref_list = [ref_list]  # Wrap in another list
-#             elif all(isinstance(ref, list) for ref in ref_list):  # Case where ref_list = [["answer1"], ["answer2"]]
-#                 pass  # Keep as is
-#             else:
-#                 raise ValueError(f"Invalid reference format at index {i}: {ref_list}")
-#         else:
-#             raise ValueError(f"Invalid reference format at index {i}: {ref_list}")
-
-#         normalized_references.append(ref_list)
-
-#     return normalized_predictions, normalized_references
-
 def normalize_predictions_references(predictions, references):
     """
     Ensures predictions are a list of strings and references are a list of lists of strings.

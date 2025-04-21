@@ -5,3 +5,4 @@ datasets
 word2number
 timm
 accelerate
+tqdm

@@ -1,5 +1,5 @@
 import numpy as np
-from utils.preprocess import *
+from utils.text_preprocess import *
 from typing import List, Callable
 import numpy as np
 from collections import Counter
@@ -71,7 +71,7 @@ def anls_single(
 
     if question_result < thresh_hold:
         question_result = 0
-    return {"anls": question_result}
+    return question_result
 
 def anls(
     all_predictions,
@@ -88,12 +88,11 @@ def anls(
     :param threshold: Threshold for ANLS scoring (default 0.5)
     :return: Aggregated ANLS score over dataset
     """
-
     predictions, references = normalize_predictions_references(all_predictions, all_references)
     anls_scores = []
 
     for reference, prediction in zip(references, predictions):
-        score = anls_single(prediction, references, threshold)["anls"]  # Compute ANLS per question
+        score = anls_single(prediction, references, threshold) # Compute ANLS per question
         anls_scores.append(score)
     
     if aggregation_method.lower() == "mean":
@@ -111,7 +110,7 @@ def anls(
     else:
         raise ValueError(f"Invalid aggregation method: {aggregation_method}")
 
-    return {"anls": aggregation_method(anls_scores) if anls_scores else 0.0}
+    return aggregation_method(anls_scores) if anls_scores else 0.0
 
 def mean_aggregation(values):
     """Returns the mean of the list."""
@@ -229,7 +228,7 @@ def exact_match(
         match = int(processed_pred in processed_refs)
         total_score += match
 
-    return {"exact_match": total_score / num_samples if num_samples > 0 else 0.0}
+    return total_score / num_samples if num_samples > 0 else 0.0
 
 
 def vqa_accuracy(predictions, references, preprocess=False):

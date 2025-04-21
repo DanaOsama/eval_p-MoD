@@ -16,3 +16,5 @@ class CustomPaliGemma(nn.Module):
 
     def forward(self, input_ids, attention_mask):
         return self.model(input_ids=input_ids, attention_mask=attention_mask)
+
+# TODO: Make sure CustomPaliGemma returns an object with .logits.

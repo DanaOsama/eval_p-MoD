@@ -1,20 +1,10 @@
 import argparse
 from train import train
-from evaluate import evaluate
+from eval import evaluate_model
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import AutoProcessor, PaliGemmaForConditionalGeneration
-from data.dataset_loader import load_hf_dataset
-
-# Dictionary mapping model names to constructors
-def create_hf_paligemma(checkpoint):
-    return PaliGemmaForConditionalGeneration.from_pretrained(checkpoint)
-
-# Dictionary to map model names to their instances
-MODEL_REGISTRY = {
-    "pmod_paligemma": lambda checkpoint: CustomPaliGemma(),,
-    "hf_paligemma": create_hf_paligemma  # Hugging Face PaliGemma with a checkpoint
-}
+from registry import MODEL_REGISTRY, load_hf_dataset
 
 def main():
     parser = argparse.ArgumentParser(description="Train or evaluate a model on a dataset.")
@@ -37,7 +27,6 @@ def main():
     dataset = load_hf_dataset(args.dataset, split=args.split)
 
     if args.task == "train":
-        model, dataset_name, epochs=3, lr=5e-5
         train(model=model, dataset_name=args.dataset, epochs=args.epochs, lr=args.lr)
     elif args.task == "evaluate":
         evaluate(dataset_name=args.dataset, model_name=args.model, metrics=args.metrics)

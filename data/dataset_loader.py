@@ -1,5 +1,6 @@
 from datasets import load_dataset, get_dataset_split_names, Dataset
 
+# TODO: Check where to specify batch size
 
 def load_ocr_vqa(split="train"):
     """
@@ -12,11 +13,17 @@ def load_ocr_vqa(split="train"):
         """Yield processed examples one at a time instead of storing them all in memory."""
         for item in dataset:
             image = item["image"]
+            image_id = item["image_id"]
             questions = item["questions"]
             answers = item["answers"]
 
-            for q, a in zip(questions, answers):
-                yield {"image": image, "question": q, "answer": a}
+            for idx, (q, a) in enumerate(zip(questions, answers)):
+                yield {
+                    "image": image,
+                    "question": q,
+                    "answer": a,
+                    "image_id": f"{image_id}_{idx}"
+                }
 
     # Convert generator to Hugging Face Dataset (Lazy loading)
     return Dataset.from_generator(data_generator)
@@ -61,14 +68,6 @@ def load_st_vqa(split="test"):
     dataset = load_dataset(dataset_name, split=split)
     return dataset
 
-# Dictionary to map dataset names to functions
-DATASET_REGISTRY = {
-    "ocr-vqa": load_ocr_vqa,
-    "text-vqa": load_text_vqa,
-    "doc-vqa": load_doc_vqa,
-    "info-vqa": load_info_vqa,
-    "st-vqa": load_st_vqa
-}
 
 def check_split_availability(dataset_name, split, dataset_subname=None):
     """Check if the requested split exists for the dataset"""
@@ -77,8 +76,5 @@ def check_split_availability(dataset_name, split, dataset_subname=None):
         raise ValueError(f"Error: Split '{split}' is not available for dataset '{dataset_name}' ({dataset_subname if dataset_subname else 'default'}). "
                          f"Available splits: {available_splits}")
 
-def load_hf_dataset(dataset_name, split="train"):
-    if dataset_name in DATASET_REGISTRY:
-        return DATASET_REGISTRY[dataset_name](split)
-    else:
-        raise ValueError(f"Dataset {dataset_name} is not supported.")
+
+
