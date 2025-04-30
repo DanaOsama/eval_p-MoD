@@ -1,6 +1,15 @@
 from datasets import load_dataset, get_dataset_split_names, Dataset
 
 # TODO: Check where to specify batch size
+def prepare_image_ocrvqa(image):
+    # Check if the image is grayscale (1 channel)
+    if image.mode != 'RGB':  # If it's not RGB, convert to RGB or process as grayscale
+        if image.mode == 'L':  # Grayscale
+            image = image.convert("RGB")  # Convert grayscale to RGB by repeating the channel
+        else:
+            print(f"Warning: Image mode is {image.mode}. Converting to RGB.")
+            image = image.convert("RGB")
+    return image
 
 def load_ocr_vqa(split="train"):
     """
@@ -13,16 +22,17 @@ def load_ocr_vqa(split="train"):
         """Yield processed examples one at a time instead of storing them all in memory."""
         for item in dataset:
             image = item["image"]
-            image_id = item["image_id"]
+            question_id = item["image_id"]
             questions = item["questions"]
             answers = item["answers"]
 
             for idx, (q, a) in enumerate(zip(questions, answers)):
+                image = prepare_image_ocrvqa(image)
                 yield {
                     "image": image,
                     "question": q,
                     "answer": a,
-                    "image_id": f"{image_id}_{idx}"
+                    "question_id": f"{question_id}_{idx}"
                 }
 
     # Convert generator to Hugging Face Dataset (Lazy loading)

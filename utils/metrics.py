@@ -7,6 +7,7 @@ from collections import Counter
 import re
 import string
 
+from tqdm import tqdm
 
 
 def levenshtein_distance(s1, s2):
@@ -21,7 +22,11 @@ def levenshtein_distance(s1, s2):
         s1, s2 = s2, s1
 
     distances = range(len(s1) + 1)
-    for i2, c2 in enumerate(s2):
+    # for i2, c2 in enumerate(s2):
+    show_progress = True
+    iterable = tqdm(enumerate(s2), total=len(s2), desc="Computing Levenshtein", leave=False) if show_progress else enumerate(s2)
+    # breakpoint()
+    for i2, c2 in iterable:
         distances_ = [i2 + 1]
         for i1, c1 in enumerate(s1):
             if c1 == c2:

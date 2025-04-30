@@ -16,6 +16,21 @@ METRICS = {
     "vqa": vqa_accuracy
 }
 
+# ---------------------------------------------
+
+import sys
+import traceback
+import pdb
+
+def info(type, value, tb):
+    traceback.print_exception(type, value, tb)
+    print("\n⚠️ Uncaught exception! Dropping into debugger...\n")
+    pdb.post_mortem(tb)
+
+sys.excepthook = info
+
+# ---------------------------------------------
+
 def collate_fn(batch):
     return {key: [d[key] for d in batch] for key in batch[0]}
 
@@ -30,6 +45,7 @@ def evaluate_model(model, dataset_name, split, batch_size=2, checkpoint=None, me
         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
     
     processor = initialize_processor_or_tokenizer(checkpoint)
+    # breakpoint()
 
     model.to(device)
     # prediction_records saves the question_id or questionId
@@ -59,6 +75,11 @@ def evaluate_model(model, dataset_name, split, batch_size=2, checkpoint=None, me
         # Check if key "answer" or "answers" and use the appropriate one
         if "answer" in batch:
             ground_truths.extend(batch["answer"])
+            # Check if the ground_truths contains null values
+            if any(gt is None for gt in ground_truths):
+                print("Ground truths contain null values. Setting calculate_metrics to False.")
+                calculate_metrics = False
+                save_json = True
         elif "answers" in batch:
             ground_truths.extend(batch["answers"])
         else:
@@ -97,11 +118,16 @@ def evaluate_model(model, dataset_name, split, batch_size=2, checkpoint=None, me
 if __name__ == "__main__":
     from registry import MODEL_REGISTRY
     model_name = "hf_paligemma"  # Change to "pmod_paligemma" for custom model
-    CHECKPOINT = "google/paligemma-3b-mix-448"
-    
+    # CHECKPOINT = "google/paligemma-3b-mix-448"
+    # CHECKPOINT = "google/paligemma-3b-ft-ocrvqa-448"
+    CHECKPOINT = "google/paligemma-3b-ft-docvqa-448"
+    # CHECKPOINT = "google/paligemma-3b-ft-infovqa-448"
     model_fn = MODEL_REGISTRY[model_name]
     model = model_fn(CHECKPOINT) if model_name == "hf_paligemma" else model_fn(None)
-    dataset_name = "st-vqa"
-    split = "test"
-    evaluate_model(model,dataset_name, split, checkpoint=CHECKPOINT, metrics=["anls", "exact_match", "vqa"])
+    # dataset_name = "info-vqa" # tmux 4
+    dataset_name = "doc-vqa" # tmux 3
+    # dataset_name = "text-vqa" # tmux 2
+    # dataset_name = "st-vqa" # tmux 1
+    split = "validation"
+    evaluate_model(model,dataset_name, split, checkpoint=CHECKPOINT, metrics=["anls", "exact_match", "vqa"], save_json=True)
     

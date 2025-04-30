@@ -3,7 +3,7 @@ from PIL import Image
 import torch
 from torchvision import transforms
 import os
-
+import numpy as np
 # TODO: Model specific prompt
 # TODO: how to add batch size.
 
@@ -99,8 +99,97 @@ def prepare_inputs(batch, model_name, device, processor):
 
         # Generate prompts with image tokens
         prompts = [get_prompt_for_model(model_name, q, n_img) for q, n_img in zip(questions, num_images_list)]
-        images = [img.convert("RGB") if isinstance(img, Image.Image) else Image.fromarray(img).convert("RGB") for img in batch["image"]]
-        
+        # images = [img.convert("RGB") if isinstance(img, Image.Image) else Image.fromarray(img).convert("RGB") for img in batch["image"]]
+        # images = []
+
+        # for img in batch["image"]:
+        #     try:
+        #         if isinstance(img, Image.Image):
+        #             img = img.convert("RGB")
+        #         else:
+        #             arr = np.array(img)
+        #             # If input is (1, H, W) → (H, W, 1)
+        #             if arr.ndim == 3 and arr.shape[0] == 1:
+        #                 arr = np.transpose(arr, (1, 2, 0))  # -> (H, W, 1)
+
+        #             # If input is (H, W), add channel dim
+        #             if arr.ndim == 2:
+        #                 arr = arr[..., np.newaxis]  # -> (H, W, 1)
+
+        #             # If input is (H, W, 1), repeat across channel dimension
+        #             if arr.ndim == 3 and arr.shape[2] == 1:
+        #                 arr = np.repeat(arr, 3, axis=2)  # -> (H, W, 3)
+
+        #             img = Image.fromarray(arr.astype("uint8")).convert("RGB")
+
+        #             # arr = np.array(img)
+        #             # if len(arr.shape) == 2:  # Grayscale (H, W)
+        #             #     arr = np.stack([arr] * 3, axis=-1)
+        #             # elif arr.shape[2] == 1:  # (H, W, 1)
+        #             #     arr = np.concatenate([arr] * 3, axis=-1)
+        #             # img = Image.fromarray(arr.astype("uint8")).convert("RGB")
+
+        #         if img.mode != "RGB":
+        #             print(f"Warning: Non-RGB image detected (mode: {img.mode}), converting.")
+        #             img = img.convert("RGB")
+
+        #         images.append(img)
+
+        #     except Exception as e:
+        #         print(f"❌ Failed to process image: {e}")
+        #         breakpoint()  # ← this is your breakpoint
+        images = []
+
+        for img in batch["image"]:
+            img = img.convert("RGB")
+            images.append(img)
+            # # breakpoint()
+            # try:
+            #     if isinstance(img, torch.Tensor):
+            #         img = img.cpu().numpy()
+                
+            #     if isinstance(img, np.ndarray):
+            #         if img.ndim == 2:
+            #             img = np.stack([img] * 3, axis=-1)  # (H, W) -> (H, W, 3)
+            #         elif img.ndim == 3:
+            #             if img.shape[0] == 1:  # (1, H, W) -> (H, W, 1)
+            #                 img = np.transpose(img, (1, 2, 0))
+            #             if img.shape[2] == 1:  # (H, W, 1) -> (H, W, 3)
+            #                 img = np.repeat(img, 3, axis=2)
+            #         img = Image.fromarray(img.astype('uint8'))
+
+            #     if isinstance(img, Image.Image):
+            #         if img.mode != "RGB":
+                        # img = img.convert("RGB")
+
+                # # Step 4: Final safety checks
+                # assert isinstance(img, Image.Image), f"Expected PIL.Image but got {type(img)}"
+                # arr = np.array(img)
+                # assert arr.ndim == 3 and arr.shape[2] == 3, f"Image shape must be (H, W, 3), got {arr.shape}"
+                # images.append(img)
+
+            # except Exception as e:
+            #     print(f"❌ Failed to process image: {e}")
+            #     breakpoint()
+            # Handle the error as needed, e.g., log it or raise an exception    
+        # for img in batch["image"]:
+        #     try:
+        #         if isinstance(img, Image.Image):
+        #             img_rgb = img.convert("RGB")
+        #         else:
+        #             arr = np.array(img)
+        #             print("Original shape:", arr.shape)
+        #             if len(arr.shape) == 2:
+        #                 arr = np.stack([arr] * 3, axis=-1)
+        #             elif arr.shape[2] == 1:
+        #                 arr = np.concatenate([arr] * 3, axis=-1)
+        #             print("Final shape before conversion:", arr.shape)
+        #             img_rgb = Image.fromarray(arr.astype("uint8")).convert("RGB")
+        #         images.append(img_rgb)
+        #     except Exception as e:
+        #         print(f"Failed to process image: {e}")
+
+        # ERROR OCCURS HERE
         inputs = processor(
             images=images,
             text=prompts,
@@ -165,3 +254,6 @@ def save_predictions_to_json(predictions, question_ids, model_name, dataset_name
         json.dump(results, f, indent=4)
 
     print(f"Saved predictions to {output_path}")
+
+
+
